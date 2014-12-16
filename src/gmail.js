@@ -59,7 +59,25 @@ var Gmail = function(localJQuery) {
 
 
   api.get.localization = function() {
-    return api.tracker.globals[17][8][8];
+    function isLocale(locale) {
+      // A locale is a 2-letter lowercase string.
+      // The 'lowercase' check distinguishes locales from other 2-letter strings like 'US'
+      // (the user's location?).
+      return (locale && ((typeof locale) === 'string') &&
+          (locale.length === 2) && (locale.toLowerCase() === locale));
+    }
+
+    var globals = api.tracker.globals;
+
+    // First candidate.
+    var locale = globals[17] && globals[17][8] && globals[17][8][8];
+    if (isLocale(locale)) return locale;
+
+    // Second candidate.
+    locale = globals[17] && globals[17][9] && globals[17][9][8];
+    if (isLocale(locale)) return locale;
+
+    return null;
   };
 
 
@@ -1043,7 +1061,7 @@ var Gmail = function(localJQuery) {
   //                   handler: function( matchElement, callback ) {}, // if specified this handler is called if a match is found. Otherwise default calls the callback & passes the jQuery matchElement
   //                   sub_observers: { }, // hash of event_name: config_hash's - config hash supports all properties of this config hash. Observer will be bound as DOMNodeInserted to the matching class+sub_selector element.
   //                 },
-  // TODO: current limitation allows only 1 action per watched className (i.e. each watched class must be 
+  // TODO: current limitation allows only 1 action per watched className (i.e. each watched class must be
   //       unique). If this functionality is needed this can be worked around by pushing actions to an array
   //       in api.tracker.dom_observer_map below
   // console.log( 'Observer set for', action, callback);
@@ -1165,9 +1183,9 @@ var Gmail = function(localJQuery) {
     This method can be called two different ways:
     Args:
       action - the name of the new DOM observer
-      className / args - for a simple observer, this arg can simply be the class on an inserted DOM element that identifies this event should be 
+      className / args - for a simple observer, this arg can simply be the class on an inserted DOM element that identifies this event should be
         triggered. For a more complicated observer, this can be an object containing properties for each of the supported DOM observer config arguments
-      parent - optional - if specified, this observer will be registered as a sub_observer for the specified parent      
+      parent - optional - if specified, this observer will be registered as a sub_observer for the specified parent
    */
   api.observe.register = function(action, args, parent) {
 
@@ -1227,7 +1245,7 @@ var Gmail = function(localJQuery) {
         //api.tracker.dom_watchdog = {}; // store passed observer callbacks for different DOM events
 
         // this listener will check every element inserted into the DOM
-        // for specified classes (as defined in api.tracker.dom_observers above) which indicate 
+        // for specified classes (as defined in api.tracker.dom_observers above) which indicate
         // related actions which need triggering
         $(window.document).bind('DOMNodeInserted', function(e) {
           api.tools.insertion_observer(e.target, api.tracker.dom_observers, api.tracker.dom_observer_map);
